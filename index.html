@@ -409,7 +409,7 @@
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.0.2';
+  var APP_VERSION = '1.0.3';
 
   var LS = {
     url:     'today.url',
@@ -438,8 +438,17 @@
   }
   function del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 
+  /* Pasting from a note often brings quotes or spaces along with it.
+     Strip them rather than make someone spot a stray ' on a phone. */
+  function clean(v) {
+    return String(v == null ? '' : v)
+      .trim()
+      .replace(/^['"`‘’“”]+|['"`‘’“”]+$/g, '')
+      .trim();
+  }
+
   /* ---- state ------------------------------------------------------ */
-  var cfg = { url: get(LS.url, ''), token: get(LS.token, ''), source: get(LS.source, '') };
+  var cfg = { url: clean(get(LS.url, '')), token: clean(get(LS.token, '')), source: get(LS.source, '') };
   var remote = get(LS.entries, []);
   var queue = get(LS.queue, []);
   var activities = get(LS.acts, FALLBACK_ACTIVITIES);
@@ -930,8 +939,10 @@
   $('cfgBack').addEventListener('click', showApp);
 
   $('cfgSave').addEventListener('click', function () {
-    var url = $('cfgUrl').value.trim();
-    var token = $('cfgToken').value.trim();
+    var url = clean($('cfgUrl').value);
+    var token = clean($('cfgToken').value);
+    $('cfgUrl').value = url;       // show exactly what is being used
+    $('cfgToken').value = token;
     var status = $('cfgStatus');
     status.hidden = false;
 
