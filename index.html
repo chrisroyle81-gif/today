@@ -409,7 +409,7 @@
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.0.1';
+  var APP_VERSION = '1.0.2';
 
   var LS = {
     url:     'today.url',
@@ -476,7 +476,36 @@
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload),
       redirect: 'follow'
-    }).then(function (r) { return r.json(); });
+    }).then(function (r) {
+      return r.text().then(function (t) {
+        try { return JSON.parse(t); }
+        catch (e) {
+          var err = new Error('The address answered, but not as the app.');
+          err.kind = 'not-json';
+          throw err;
+        }
+      });
+    });
+  }
+
+  /* Turns a failed request into the most likely real cause, in words
+     the person holding the phone can act on. */
+  function explainFailure(url, err) {
+    if (!navigator.onLine) return 'This phone has no signal just now.';
+    url = String(url || '');
+    if (/\/dev\/?$/.test(url)) {
+      return 'That’s the test address — it ends in /dev. Use the one ending in /exec, from Deploy → Manage deployments.';
+    }
+    if (/\/macros\/u\/\d+\//.test(url)) {
+      return 'That address has /u/' + url.match(/\/u\/(\d+)\//)[1] + '/ in it, which ties it to whoever is signed in to the browser. Copy it again from Deploy → Manage deployments instead of the address bar.';
+    }
+    if (!/^https:\/\/script\.google\.com\/(a\/[^/]+\/)?macros\/s\/[^/]+\/exec\/?$/.test(url)) {
+      return 'That doesn’t look like a web app address. It should start https://script.google.com/macros/s/ and end in /exec.';
+    }
+    if (err && err.kind === 'not-json') {
+      return 'The address answered, but not as the app. Check the deployment is still active in Manage deployments.';
+    }
+    return 'The phone is online but the address wouldn’t answer. Usually the deployment’s “Who has access” isn’t set to “Anyone”, or it was replaced by a new deployment with a different address.';
   }
 
   /* ---- queue ------------------------------------------------------ */
@@ -514,7 +543,9 @@
     }
 
     return step()
-      .catch(function () { record({ ok: false, offline: true }); })
+      .catch(function (err) {
+        record({ ok: false, offline: !navigator.onLine, error: explainFailure(cfg.url, err) });
+      })
       .then(function () { flushing = false; paint(); });
   }
 
@@ -540,10 +571,8 @@
       })
       .catch(function (err) {
         // No signal is normal and not worth alarming anyone about. Anything
-        // that reaches here with a signal (e.g. a login page instead of
-        // JSON) is recorded so Settings can show it.
-        record({ ok: false, offline: !navigator.onLine,
-                 error: navigator.onLine ? 'Got a reply that wasn’t from the app. Check the address, and that the deployment is set to “Anyone”.' : '' });
+        // else is recorded so Settings can say what actually went wrong.
+        record({ ok: false, offline: !navigator.onLine, error: explainFailure(cfg.url, err) });
         paint();
       });
   }
@@ -943,10 +972,10 @@
       paint();
       flush();
       setTimeout(showApp, 1200);
-    }).catch(function () {
+    }).catch(function (err) {
       cfg.url = was.url; cfg.token = was.token;
       status.className = 'status bad';
-      status.textContent = 'Could not reach it. Check the address and the signal.';
+      status.textContent = explainFailure(url, err);
     });
   });
 
