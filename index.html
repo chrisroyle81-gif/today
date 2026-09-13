@@ -409,7 +409,7 @@
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.0.3';
+  var APP_VERSION = '1.0.4';
 
   var LS = {
     url:     'today.url',
@@ -472,6 +472,15 @@
 
   function pad(n) { return n < 10 ? '0' + n : String(n); }
   function keyOf(y, m, d) { return y + '-' + pad(m + 1) + '-' + pad(d); }
+
+  /* The Sheet should always send yyyy-MM-dd. If a date has been turned
+     into a date value on the way, read it back rather than drop the day. */
+  function dayKey(v) {
+    var s = String(v == null ? '' : v).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    var d = new Date(s);
+    return isNaN(d.getTime()) ? '' : keyOf(d.getFullYear(), d.getMonth(), d.getDate());
+  }
   function buzz(ms) { if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} } }
   function $(id) { return document.getElementById(id); }
 
@@ -611,7 +620,7 @@
 
     remote.forEach(function (r) {
       if (superseded[r.entry_id]) return;
-      add(r.entry_date, r.kind, r.activity, r.note);
+      add(dayKey(r.entry_date), r.kind, r.activity, r.note);
     });
 
     queue.forEach(function (p) {
