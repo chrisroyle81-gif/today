@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#EDF0EC">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>What I Got Up To</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Figtree:wght@400;500;600;700&display=swap">
+
+<style>
+  :root {
+    --ground:      #EDF0EC;
+    --surface:     #FFFFFF;
+    --surface-sunk:#E3E8E2;
+    --ink:         #1E2522;
+    --ink-soft:    #57635C;
+    --ink-faint:   #8A968E;
+    --line:        #CBD4CB;
+    --green:       #2E6B4A;
+    --green-soft:  #CBE0D2;
+    --green-deep:  #1D4A32;
+    --on-green:    #FFFFFF;
+    --amber:       #A8702A;
+
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(30,37,34,.06), 0 6px 18px rgba(30,37,34,.05);
+
+    --sans:  "Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #161A18;
+      --surface:     #1F2522;
+      --surface-sunk:#141817;
+      --ink:         #E8EEE9;
+      --ink-soft:    #A5B2AA;
+      --ink-faint:   #718077;
+      --line:        #333C37;
+      --green:       #7BC79A;
+      --green-soft:  #23402F;
+      --green-deep:  #A8DCBB;
+      --on-green:    #10201A;
+      --amber:       #D9A461;
+      --shadow:      0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #161A18;
+    --surface:     #1F2522;
+    --surface-sunk:#141817;
+    --ink:         #E8EEE9;
+    --ink-soft:    #A5B2AA;
+    --ink-faint:   #718077;
+    --line:        #333C37;
+    --green:       #7BC79A;
+    --green-soft:  #23402F;
+    --green-deep:  #A8DCBB;
+    --on-green:    #10201A;
+    --amber:       #D9A461;
+    --shadow:      0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body.bar-open { padding-bottom: 104px; }
+  [hidden] { display: none !important; }
+
+  .wrap { max-width: 460px; margin: 0 auto; padding: 0 16px 40px; }
+
+  header { padding: 22px 0 16px; }
+  .today-date {
+    font-size: 13px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-faint); font-weight: 600; margin: 0 0 6px;
+  }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: 1.2; margin: 0; }
+  .as-badge {
+    display: inline-block; margin-top: 10px;
+    padding: 5px 12px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+    color: var(--ink-soft); background: var(--surface-sunk);
+  }
+
+  .card {
+    background: var(--surface); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px 16px; margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .card h2 { font-family: var(--sans); font-size: 19px; font-weight: 600; margin: 0 0 6px; line-height: 1.35; }
+  .card .sub { margin: 0 0 16px; font-size: 15px; color: var(--ink-faint); }
+
+  #entry { display: flex; flex-direction: column; min-height: calc(100svh - 176px); }
+
+  .choices { flex: 1 1 auto; display: flex; flex-direction: column; gap: 10px; }
+
+  .choice {
+    flex: 1 1 auto; min-height: 64px; max-height: 104px;
+    display: flex; align-items: center; gap: 14px; width: 100%;
+    padding: 12px 16px;
+    font-family: var(--sans); font-size: 19px; font-weight: 500; text-align: left;
+    color: var(--ink); background: var(--surface);
+    border: 2px solid var(--line); border-radius: var(--radius);
+    cursor: pointer; transition: background .12s ease, border-color .12s ease;
+  }
+  .choice:hover { border-color: var(--green); }
+  .choice:active { background: var(--surface-sunk); }
+  .choice[aria-pressed="true"] {
+    border-color: var(--green); background: var(--green-soft);
+    color: var(--green-deep); font-weight: 600;
+  }
+  .tick {
+    flex: 0 0 26px; height: 26px; border-radius: 50%;
+    border: 2px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    color: transparent; font-size: 15px; font-weight: 700;
+  }
+  .choice[aria-pressed="true"] .tick {
+    background: var(--green); border-color: var(--green); color: var(--on-green);
+  }
+
+  .rest {
+    display: block; width: 100%; margin-top: 12px; padding: 14px;
+    font-family: var(--sans); font-size: 17px; color: var(--ink-soft);
+    background: none; border: none; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 4px;
+  }
+  .rest:hover { color: var(--ink); }
+
+  label.field { display: block; font-size: 16px; color: var(--ink-soft); margin-bottom: 8px; }
+  textarea, input[type="text"], input[type="url"] {
+    width: 100%; padding: 14px;
+    font-family: var(--sans); font-size: 18px; line-height: 1.45;
+    color: var(--ink); background: var(--surface);
+    border: 2px solid var(--line); border-radius: var(--radius);
+  }
+  textarea { min-height: 84px; resize: vertical; }
+  textarea:focus, input:focus { outline: none; border-color: var(--green); }
+
+  #saveBar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--ground) 72%, transparent);
+    display: flex; justify-content: center;
+  }
+  .save {
+    width: 100%; max-width: 428px; min-height: 72px;
+    font-family: var(--sans); font-size: 22px; font-weight: 700;
+    color: var(--on-green); background: var(--green);
+    border: none; border-radius: var(--radius);
+    box-shadow: 0 6px 20px rgba(30,37,34,.18); cursor: pointer;
+  }
+  .save:active { background: var(--green-deep); }
+  .save:disabled { opacity: .6; cursor: default; }
+
+  .saved-msg { font-family: var(--serif); font-size: 24px; line-height: 1.3; margin: 0 0 6px; }
+  .saved-sub { margin: 0 0 18px; color: var(--ink-soft); font-size: 16px; }
+
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .ghost {
+    flex: 1 1 auto; min-height: 56px; padding: 12px 16px;
+    font-family: var(--sans); font-size: 17px; font-weight: 600;
+    color: var(--ink); background: var(--surface);
+    border: 2px solid var(--line); border-radius: var(--radius); cursor: pointer;
+  }
+  .ghost:hover { border-color: var(--green); }
+
+  .month-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .month-name {
+    font-family: var(--serif); font-size: 22px; font-weight: 400;
+    margin: 0; flex: 1 1 auto; text-align: center;
+  }
+  .nav {
+    flex: 0 0 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; line-height: 1; color: var(--ink-soft);
+    background: none; border: 2px solid var(--line); border-radius: 10px; cursor: pointer;
+  }
+  .nav:hover:not(:disabled) { border-color: var(--green); color: var(--ink); }
+  .nav:disabled { opacity: .3; cursor: default; }
+
+  .month-count {
+    display: block; text-align: center; font-size: 15px;
+    font-weight: 600; color: var(--green); margin-bottom: 14px;
+  }
+
+  .grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+  .dow {
+    min-width: 0; text-align: center; font-size: 11px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-faint); padding-bottom: 4px;
+  }
+  .day {
+    min-width: 0; aspect-ratio: 1 / 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0; border: none; border-radius: 10px;
+    font-family: var(--sans); font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft); background: var(--surface-sunk); cursor: pointer;
+  }
+  .day.empty { background: none; cursor: default; }
+  .day.done { background: var(--green); color: var(--on-green); font-weight: 700; }
+  .day.rest { color: var(--ink-faint); box-shadow: inset 0 0 0 2px var(--line); }
+  .day.today { box-shadow: inset 0 0 0 2px var(--amber); color: var(--ink); font-weight: 700; }
+  .day.done.today { color: var(--on-green); }
+  .day.picked { box-shadow: inset 0 0 0 3px var(--ink); }
+
+  .legend {
+    display: flex; gap: 14px; flex-wrap: wrap; margin-top: 14px;
+    font-size: 13px; color: var(--ink-faint);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 13px; height: 13px; border-radius: 4px; display: inline-block; }
+
+  .detail { margin-top: 16px; padding-top: 16px; border-top: 2px solid var(--line); }
+  .detail h3 { font-family: var(--serif); font-weight: 400; font-size: 19px; margin: 0 0 10px; }
+  .detail ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .detail li { display: flex; align-items: flex-start; gap: 10px; font-size: 17px; }
+  .detail li .dot { flex: 0 0 8px; height: 8px; margin-top: 8px; border-radius: 50%; background: var(--green); }
+  .detail .quote {
+    margin: 10px 0 0; padding-left: 14px;
+    border-left: 3px solid var(--green-soft);
+    font-size: 16px; color: var(--ink-soft); font-style: italic;
+  }
+  .detail .none { margin: 0; color: var(--ink-faint); font-size: 16px; }
+
+  .badges { display: flex; flex-direction: column; gap: 12px; }
+  .badge { display: flex; align-items: center; gap: 12px; font-size: 16px; }
+  .badge .mark {
+    flex: 0 0 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700;
+    background: var(--green); color: var(--on-green);
+  }
+  .badge.pending .mark { background: none; color: var(--ink-faint); box-shadow: inset 0 0 0 2px var(--line); }
+  .badge.pending { color: var(--ink-soft); }
+
+  .meter { margin-top: 16px; height: 12px; border-radius: 6px; background: var(--surface-sunk); overflow: hidden; }
+  .meter > i { display: block; height: 100%; background: var(--green); border-radius: 6px; }
+  .meter-label { margin: 8px 0 0; font-size: 14px; color: var(--ink-soft); }
+
+  /* ---- waiting-to-send notice ------------------------------------- */
+  .waiting {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px; padding: 12px 14px;
+    border-radius: var(--radius);
+    background: var(--surface-sunk); color: var(--ink-soft); font-size: 15px;
+  }
+  .waiting b { color: var(--ink); font-weight: 600; }
+
+  /* ---- settings ---------------------------------------------------- */
+  footer { text-align: center; padding: 8px 0 4px; }
+  .link {
+    background: none; border: none; cursor: pointer;
+    font-family: var(--sans); font-size: 15px; color: var(--ink-faint);
+    text-decoration: underline; text-underline-offset: 4px; padding: 12px;
+  }
+  .link:hover { color: var(--ink); }
+
+  .setup-fields { display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px; }
+  .note-line { font-size: 15px; color: var(--ink-soft); margin: 0 0 16px; }
+  .status { margin: 14px 0 0; font-size: 16px; font-weight: 600; }
+  .status.good { color: var(--green); }
+  .status.bad { color: var(--amber); }
+
+  :focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+    html { scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ SETUP (only ever seen by whoever sets a phone up) === -->
+<div class="wrap" id="setupScreen" hidden>
+  <header>
+    <p class="today-date">Setting up</p>
+    <h1>Whose phone is this?</h1>
+  </header>
+
+  <section class="card">
+    <p class="note-line">
+      Paste the web app address and this person&rsquo;s token. It&rsquo;s kept on this phone
+      only and never leaves it except to talk to your own endpoint.
+    </p>
+
+    <div class="setup-fields">
+      <div>
+        <label class="field" for="cfgUrl">Web app address</label>
+        <input type="url" id="cfgUrl" autocomplete="off" autocapitalize="off"
+               spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec">
+      </div>
+      <div>
+        <label class="field" for="cfgToken">Token</label>
+        <input type="text" id="cfgToken" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+    </div>
+
+    <button class="save" id="cfgSave">Check and save</button>
+    <p class="status" id="cfgStatus" hidden></p>
+
+    <div class="row" style="margin-top:16px">
+      <button class="ghost" id="cfgRetry">Try sending what&rsquo;s waiting</button>
+      <button class="ghost" id="cfgForget">Forget this phone</button>
+    </div>
+    <p class="note-line" id="cfgQueue" style="margin-top:14px"></p>
+  </section>
+
+  <footer><button class="link" id="cfgBack">Back</button></footer>
+</div>
+
+<!-- ============ APP ================================================ -->
+<div class="wrap" id="appScreen" hidden>
+
+  <header>
+    <p class="today-date" id="todayDate"></p>
+    <h1 id="greeting">Hi Mum</h1>
+    <span class="as-badge" id="asBadge" hidden></span>
+  </header>
+
+  <div class="waiting" id="waiting" hidden>
+    <span id="waitingText"></span>
+  </div>
+
+  <section class="card" id="entry">
+    <h2>What did you get up to today?</h2>
+    <p class="sub" id="entrySub">Tap as many as you like. Tap again to take one off.</p>
+    <div class="choices" id="choices"></div>
+    <button class="rest" id="restBtn">Not today</button>
+  </section>
+
+  <section class="card" id="more" hidden>
+    <label class="field" for="note">Anything you want to add? (you don&rsquo;t have to)</label>
+    <textarea id="note" placeholder="walked from the carpark to the hospital twice"></textarea>
+  </section>
+
+  <section class="card" id="saved" hidden>
+    <p class="saved-msg" id="savedMsg"></p>
+    <p class="saved-sub" id="savedSub"></p>
+    <div class="row">
+      <button class="ghost" id="shareBtn">Tell someone</button>
+      <button class="ghost" id="againBtn">Add something else</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="month-head">
+      <button class="nav" id="prevMonth" type="button" aria-label="Previous month">&#8249;</button>
+      <h2 class="month-name" id="monthName"></h2>
+      <button class="nav" id="nextMonth" type="button" aria-label="Next month">&#8250;</button>
+    </div>
+    <span class="month-count" id="monthCount"></span>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--green)"></i> got out</span>
+      <span><i class="swatch" style="background:var(--surface-sunk);box-shadow:inset 0 0 0 2px var(--line)"></i> rest day</span>
+      <span><i class="swatch" style="background:none;box-shadow:inset 0 0 0 2px var(--amber)"></i> today</span>
+    </div>
+
+    <div class="detail" id="detail" hidden>
+      <h3 id="detailDate"></h3>
+      <div id="detailBody"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>How you&rsquo;re going</h2>
+    <p class="sub" id="milestoneSub"></p>
+    <div class="badges">
+      <div class="badge pending" id="badge1"><span class="mark">&middot;</span> First one in</div>
+      <div class="badge pending" id="badge5"><span class="mark">&middot;</span> Five days</div>
+      <div class="badge pending" id="badge10"><span class="mark">&middot;</span> Ten days</div>
+    </div>
+    <div class="meter"><i id="meterFill"></i></div>
+    <p class="meter-label" id="meterLabel"></p>
+  </section>
+
+  <footer><button class="link" id="openSettings">Settings</button></footer>
+</div>
+
+<div id="saveBar" hidden><button class="save" id="saveBtn">Save</button></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var APP_VERSION = '1.0.0';
+
+  var LS = {
+    url:     'today.url',
+    token:   'today.token',
+    source:  'today.source',
+    entries: 'today.entries',
+    acts:    'today.activities',
+    queue:   'today.queue'
+  };
+
+  var FALLBACK_ACTIVITIES = [
+    "Lisa's stretches", 'Walk to the chemist', 'Treadmill',
+    'Walked to the shops', 'Gym', 'Something else'
+  ];
+
+  /* ---- tiny storage helpers (never throw) ------------------------- */
+  function get(k, fallback) {
+    try {
+      var v = localStorage.getItem(k);
+      return v === null ? fallback : JSON.parse(v);
+    } catch (e) { return fallback; }
+  }
+  function set(k, v) {
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+  }
+  function del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+
+  /* ---- state ------------------------------------------------------ */
+  var cfg = { url: get(LS.url, ''), token: get(LS.token, ''), source: get(LS.source, '') };
+  var remote = get(LS.entries, []);
+  var queue = get(LS.queue, []);
+  var activities = get(LS.acts, FALLBACK_ACTIVITIES);
+
+  var now = new Date();
+  var TODAY_KEY = keyOf(now.getFullYear(), now.getMonth(), now.getDate());
+  var viewY = now.getFullYear();
+  var viewM = now.getMonth();
+  var openKey = null;
+  var store = {};
+
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+  function keyOf(y, m, d) { return y + '-' + pad(m + 1) + '-' + pad(d); }
+  function buzz(ms) { if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} } }
+  function $(id) { return document.getElementById(id); }
+
+  /* ---- network ---------------------------------------------------- */
+  /* text/plain keeps this a "simple" request, so the browser never
+     sends a CORS preflight — which Apps Script cannot answer. */
+  function api(payload) {
+    if (!cfg.url) return Promise.reject(new Error('Not set up yet.'));
+    return fetch(cfg.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+      redirect: 'follow'
+    }).then(function (r) { return r.json(); });
+  }
+
+  /* ---- queue ------------------------------------------------------ */
+  var flushing = false;
+
+  function enqueue(payload) {
+    queue.push(payload);
+    set(LS.queue, queue);
+    paint();
+    flush();
+  }
+
+  function flush() {
+    if (flushing || !queue.length || !cfg.url || !cfg.token) return Promise.resolve();
+    flushing = true;
+
+    function step() {
+      if (!queue.length) return Promise.resolve();
+      var item = queue[0];
+      var body = {};
+      for (var k in item) body[k] = item[k];
+      body.token = cfg.token;
+
+      return api(body).then(function (res) {
+        if (res && res.ok) {
+          queue.shift();
+          set(LS.queue, queue);
+          return step();
+        }
+        // A rejected token is a fixable mistake, not a reason to throw
+        // away what she wrote. Stop and keep it for next time.
+        return Promise.resolve();
+      });
+    }
+
+    return step()
+      .catch(function () { /* offline — keep the queue and try later */ })
+      .then(function () { flushing = false; paint(); });
+  }
+
+  function refresh() {
+    if (!cfg.url || !cfg.token) return Promise.resolve();
+    return api({ action: 'list', token: cfg.token })
+      .then(function (res) {
+        if (!res || !res.ok) return;
+        remote = res.entries || [];
+        set(LS.entries, remote);
+        if (res.activities && res.activities.length) {
+          activities = res.activities;
+          set(LS.acts, activities);
+          renderChoices();
+        }
+        if (res.source) { cfg.source = res.source; set(LS.source, res.source); }
+        paint();
+      })
+      .catch(function () { /* offline — cached view stays on screen */ });
+  }
+
+  /* ---- fold rows into days ---------------------------------------- */
+  function buildStore() {
+    store = {};
+
+    // A correction row replaces the row it names.
+    var superseded = {};
+    remote.forEach(function (r) {
+      if (r.supersedes) superseded[r.supersedes] = true;
+    });
+
+    remote.forEach(function (r) {
+      if (superseded[r.entry_id]) return;
+      add(r.entry_date, r.kind, r.activity, r.note);
+    });
+
+    queue.forEach(function (p) {
+      add(p.entry_date, p.kind, p.activity, p.note);
+    });
+
+    function add(date, kind, activity, note) {
+      if (!date) return;
+      var rec = store[date];
+      if (!rec) { rec = store[date] = { kind: 'rest', items: [], notes: [] }; }
+      if (kind === 'not_today') {
+        if (rec.items.length === 0) rec.kind = 'rest';
+      } else {
+        rec.kind = 'done';
+        if (activity && rec.items.indexOf(activity) === -1) rec.items.push(activity);
+      }
+      if (note && rec.notes.indexOf(note) === -1) rec.notes.push(note);
+    }
+  }
+
+  function doneIn(y, m) {
+    var n = 0, prefix = y + '-' + pad(m + 1) + '-';
+    for (var k in store) {
+      if (k.indexOf(prefix) === 0 && store[k].kind === 'done') n++;
+    }
+    return n;
+  }
+
+  /* ---- rendering --------------------------------------------------- */
+  function renderChoices() {
+    var box = $('choices');
+    box.textContent = '';
+    activities.forEach(function (label) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'choice';
+      b.setAttribute('aria-pressed', 'false');
+      b.innerHTML = '<span class="tick">&#10003;</span>';
+      b.appendChild(document.createTextNode(label));
+      b.dataset.label = label;
+      box.appendChild(b);
+    });
+  }
+
+  function selected() {
+    return Array.prototype.filter.call($('choices').children, function (c) {
+      return c.getAttribute('aria-pressed') === 'true';
+    }).map(function (c) { return c.dataset.label; });
+  }
+
+  function syncBar() {
+    var any = selected().length > 0;
+    $('saveBar').hidden = !any || !$('saved').hidden;
+    $('more').hidden = !any || !$('saved').hidden;
+    document.body.classList.toggle('bar-open', !$('saveBar').hidden);
+  }
+
+  function paint() {
+    buildStore();
+
+    $('todayDate').textContent =
+      now.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    var mine = cfg.source === 'self';
+    $('greeting').textContent = mine ? 'Hi Mum' : "Mum's day";
+    $('asBadge').hidden = mine || !cfg.source;
+    if (!mine && cfg.source) {
+      $('asBadge').textContent = 'You’re adding as ' + cfg.source;
+    }
+
+    var todayRec = store[TODAY_KEY];
+    $('entrySub').textContent = (todayRec && todayRec.kind === 'done')
+      ? 'You’ve already got something down for today. Add more if you like.'
+      : 'Tap as many as you like. Tap again to take one off.';
+
+    var n = queue.length;
+    $('waiting').hidden = n === 0;
+    if (n) {
+      $('waitingText').innerHTML = '<b>' + n + (n === 1 ? ' thing' : ' things') +
+        '</b> saved on this phone, waiting for a signal.';
+    }
+
+    renderMonth();
+  }
+
+  function renderMonth() {
+    var label = new Date(viewY, viewM, 1).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+    $('monthName').textContent = (viewY === now.getFullYear()) ? label.replace(' ' + viewY, '') : label;
+
+    var n = doneIn(viewY, viewM);
+    $('monthCount').textContent = n + (n === 1 ? ' day this month' : ' days this month');
+    $('nextMonth').disabled = (viewY === now.getFullYear() && viewM === now.getMonth());
+
+    var grid = $('grid');
+    grid.textContent = '';
+    ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach(function (l) {
+      var el = document.createElement('div');
+      el.className = 'dow';
+      el.textContent = l;
+      grid.appendChild(el);
+    });
+
+    var firstDow = (new Date(viewY, viewM, 1).getDay() + 6) % 7;
+    for (var b = 0; b < firstDow; b++) {
+      var blank = document.createElement('div');
+      blank.className = 'day empty';
+      grid.appendChild(blank);
+    }
+
+    var total = new Date(viewY, viewM + 1, 0).getDate();
+    for (var d = 1; d <= total; d++) {
+      var k = keyOf(viewY, viewM, d);
+      var cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'day';
+      var rec = store[k];
+      if (rec && rec.kind === 'done') cell.className += ' done';
+      else if (rec && rec.kind === 'rest') cell.className += ' rest';
+      if (k === TODAY_KEY) cell.className += ' today';
+      if (k === openKey) cell.className += ' picked';
+      cell.textContent = d;
+      cell.dataset.key = k;
+      grid.appendChild(cell);
+    }
+
+    var cur = doneIn(now.getFullYear(), now.getMonth());
+    $('milestoneSub').textContent = now.toLocaleDateString('en-AU', { month: 'long' }) + ' so far';
+    $('meterFill').style.width = Math.min(100, cur * 10) + '%';
+    $('meterLabel').textContent = cur + ' of 10 — no rush, it keeps counting.';
+    badge('badge1', cur >= 1);
+    badge('badge5', cur >= 5);
+    badge('badge10', cur >= 10);
+  }
+
+  function badge(id, earned) {
+    var el = $(id);
+    el.className = earned ? 'badge' : 'badge pending';
+    el.querySelector('.mark').innerHTML = earned ? '&#10003;' : '&middot;';
+  }
+
+  /* ---- day detail --------------------------------------------------- */
+  function showDetail(k) {
+    var p = k.split('-').map(Number);
+    $('detailDate').textContent = new Date(p[0], p[1] - 1, p[2])
+      .toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    var body = $('detailBody');
+    var rec = store[k];
+    body.textContent = '';
+
+    if (!rec) {
+      body.appendChild(para('none', 'Nothing written down for this day.'));
+    } else if (rec.kind === 'rest') {
+      body.appendChild(para('none', 'A rest day.'));
+    } else {
+      var ul = document.createElement('ul');
+      rec.items.forEach(function (item) {
+        var li = document.createElement('li');
+        var dot = document.createElement('span');
+        dot.className = 'dot';
+        li.appendChild(dot);
+        li.appendChild(document.createTextNode(item));
+        ul.appendChild(li);
+      });
+      body.appendChild(ul);
+      rec.notes.forEach(function (t) { body.appendChild(para('quote', '“' + t + '”')); });
+    }
+    $('detail').hidden = false;
+  }
+
+  function para(cls, text) {
+    var p = document.createElement('p');
+    p.className = cls;
+    p.textContent = text;
+    return p;
+  }
+
+  function closeDetail() { openKey = null; $('detail').hidden = true; }
+
+  /* ---- events -------------------------------------------------------- */
+  $('choices').addEventListener('click', function (e) {
+    var btn = e.target.closest('.choice');
+    if (!btn) return;
+    var on = btn.getAttribute('aria-pressed') === 'true';
+    btn.setAttribute('aria-pressed', String(!on));
+    buzz(on ? 8 : 18);
+    syncBar();
+  });
+
+  $('grid').addEventListener('click', function (e) {
+    var cell = e.target.closest('.day');
+    if (!cell || cell.classList.contains('empty')) return;
+    buzz(8);
+    var k = cell.dataset.key;
+    if (openKey === k) { closeDetail(); renderMonth(); return; }
+    openKey = k;
+    showDetail(k);
+    renderMonth();
+  });
+
+  $('prevMonth').addEventListener('click', function () {
+    buzz(8);
+    viewM--; if (viewM < 0) { viewM = 11; viewY--; }
+    closeDetail(); renderMonth();
+  });
+  $('nextMonth').addEventListener('click', function () {
+    buzz(8);
+    viewM++; if (viewM > 11) { viewM = 0; viewY++; }
+    closeDetail(); renderMonth();
+  });
+
+  function finish(msg, sub) {
+    $('savedMsg').textContent = msg;
+    $('savedSub').textContent = sub;
+    $('entry').hidden = true;
+    $('more').hidden = true;
+    $('saveBar').hidden = true;
+    document.body.classList.remove('bar-open');
+    $('saved').hidden = false;
+    viewY = now.getFullYear(); viewM = now.getMonth();
+    closeDetail();
+    paint();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  $('saveBtn').addEventListener('click', function () {
+    var items = selected();
+    if (!items.length) return;
+    buzz(30);
+
+    var text = $('note').value.trim();
+    // One row per activity. Her note rides on the first of them, so her
+    // words are stored once, verbatim, rather than copied across rows.
+    items.forEach(function (label, i) {
+      enqueue({
+        action: 'add',
+        entry_date: TODAY_KEY,
+        kind: 'did',
+        activity: label,
+        note: i === 0 ? text : '',
+        app_version: APP_VERSION
+      });
+    });
+
+    finish('That’s today done.', items.join(', ') + ' — saved just now.');
+  });
+
+  $('restBtn').addEventListener('click', function () {
+    buzz(30);
+    enqueue({
+      action: 'add',
+      entry_date: TODAY_KEY,
+      kind: 'not_today',
+      activity: '',
+      note: '',
+      app_version: APP_VERSION
+    });
+    finish('Noted — a rest day.', 'Rest days are part of it. Nothing lost.');
+  });
+
+  $('againBtn').addEventListener('click', function () {
+    buzz(8);
+    Array.prototype.forEach.call($('choices').children, function (c) {
+      c.setAttribute('aria-pressed', 'false');
+    });
+    $('note').value = '';
+    $('saved').hidden = true;
+    $('entry').hidden = false;
+    syncBar();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  function flash(btn, msg) {
+    var was = btn.textContent;
+    btn.textContent = msg;
+    setTimeout(function () { btn.textContent = was; }, 2600);
+  }
+
+  $('shareBtn').addEventListener('click', function () {
+    buzz(8);
+    var btn = this;
+    var rec = store[TODAY_KEY];
+    var text = (rec && rec.items && rec.items.length)
+      ? 'Mum did ' + rec.items.join(' and ').toLowerCase() + ' today.'
+      : 'Mum got something in today.';
+
+    if (navigator.share) { navigator.share({ text: text }).catch(function () {}); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { flash(btn, 'Copied — paste it into a message'); },
+        function () { flash(btn, text); }
+      );
+      return;
+    }
+    flash(btn, text);
+  });
+
+  /* ---- settings ------------------------------------------------------ */
+  function showSetup() {
+    $('cfgUrl').value = cfg.url || '';
+    $('cfgToken').value = cfg.token || '';
+    $('cfgStatus').hidden = true;
+    $('cfgQueue').textContent = queue.length
+      ? queue.length + ' entr' + (queue.length === 1 ? 'y is' : 'ies are') + ' still waiting to send.'
+      : 'Nothing waiting to send.';
+    $('cfgBack').hidden = !(cfg.url && cfg.token);
+    $('appScreen').hidden = true;
+    $('saveBar').hidden = true;
+    document.body.classList.remove('bar-open');
+    $('setupScreen').hidden = false;
+  }
+
+  function showApp() {
+    $('setupScreen').hidden = true;
+    $('appScreen').hidden = false;
+    syncBar();
+  }
+
+  $('openSettings').addEventListener('click', showSetup);
+  $('cfgBack').addEventListener('click', showApp);
+
+  $('cfgSave').addEventListener('click', function () {
+    var url = $('cfgUrl').value.trim();
+    var token = $('cfgToken').value.trim();
+    var status = $('cfgStatus');
+    status.hidden = false;
+
+    if (!url || !token) {
+      status.className = 'status bad';
+      status.textContent = 'Both the address and the token are needed.';
+      return;
+    }
+
+    status.className = 'status';
+    status.textContent = 'Checking…';
+
+    var was = { url: cfg.url, token: cfg.token };
+    cfg.url = url; cfg.token = token;
+
+    api({ action: 'list', token: token }).then(function (res) {
+      if (!res || !res.ok) {
+        cfg.url = was.url; cfg.token = was.token;
+        status.className = 'status bad';
+        status.textContent = (res && res.error) || 'That was not accepted.';
+        return;
+      }
+      set(LS.url, url); set(LS.token, token);
+      cfg.source = res.source || '';
+      set(LS.source, cfg.source);
+      remote = res.entries || [];
+      set(LS.entries, remote);
+      if (res.activities && res.activities.length) {
+        activities = res.activities;
+        set(LS.acts, activities);
+        renderChoices();
+      }
+      status.className = 'status good';
+      status.textContent = 'Saved. This phone records as: ' + cfg.source;
+      paint();
+      flush();
+      setTimeout(showApp, 1200);
+    }).catch(function () {
+      cfg.url = was.url; cfg.token = was.token;
+      status.className = 'status bad';
+      status.textContent = 'Could not reach it. Check the address and the signal.';
+    });
+  });
+
+  $('cfgRetry').addEventListener('click', function () {
+    var btn = this;
+    flush().then(function () {
+      flash(btn, queue.length ? 'Still waiting' : 'All sent');
+      $('cfgQueue').textContent = queue.length
+        ? queue.length + ' still waiting to send.'
+        : 'Nothing waiting to send.';
+    });
+  });
+
+  $('cfgForget').addEventListener('click', function () {
+    if (queue.length && !window.confirm(
+      queue.length + ' entries have not been sent yet. Forget this phone anyway?')) return;
+    del(LS.url); del(LS.token); del(LS.source);
+    cfg = { url: '', token: '', source: '' };
+    showSetup();
+  });
+
+  /* ---- start ---------------------------------------------------------- */
+  renderChoices();
+  paint();
+
+  if (cfg.url && cfg.token) {
+    showApp();
+    flush().then(refresh);
+  } else {
+    showSetup();
+  }
+
+  window.addEventListener('online', function () { flush().then(refresh); });
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  }
+}());
+</script>
+</body>
+</html>
