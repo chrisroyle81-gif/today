@@ -28,6 +28,16 @@
     --on-green:    #FFFFFF;
     --amber:       #A8702A;
 
+    /* One colour per activity button: soft tint, edge, and the deep shade
+       it fills with when ticked. Cycles if there are more than six. */
+    --h0-tint: #DCEEE2; --h0-edge: #9CC9AC; --h0-deep: #2E6B4A;
+    --h1-tint: #DDE8F4; --h1-edge: #9DBBDD; --h1-deep: #2D5B8A;
+    --h2-tint: #F7EACB; --h2-edge: #E0C07A; --h2-deep: #8C5C0F;
+    --h3-tint: #F6DEDB; --h3-edge: #DDA49D; --h3-deep: #9C4136;
+    --h4-tint: #E7E1F2; --h4-edge: #B9AAD8; --h4-deep: #594887;
+    --h5-tint: #D6EEEC; --h5-edge: #95CBC6; --h5-deep: #256B66;
+    --on-deep: #FFFFFF;
+
     --radius: 14px;
     --shadow: 0 1px 2px rgba(30,37,34,.06), 0 6px 18px rgba(30,37,34,.05);
 
@@ -49,6 +59,13 @@
       --green-deep:  #A8DCBB;
       --on-green:    #10201A;
       --amber:       #D9A461;
+      --h0-tint: #1F3528; --h0-edge: #3E6B50; --h0-deep: #8FD3A9;
+      --h1-tint: #1F2D3D; --h1-edge: #3F5F84; --h1-deep: #9CC3EC;
+      --h2-tint: #3A2F17; --h2-edge: #7A6230; --h2-deep: #E8C67E;
+      --h3-tint: #3B2522; --h3-edge: #7C4A43; --h3-deep: #EDA79E;
+      --h4-tint: #2C2740; --h4-edge: #5E528A; --h4-deep: #C3B5EA;
+      --h5-tint: #1B3533; --h5-edge: #3C6E69; --h5-deep: #8ED3CC;
+      --on-deep: #121816;
       --shadow:      0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3);
     }
   }
@@ -65,6 +82,13 @@
     --green-deep:  #A8DCBB;
     --on-green:    #10201A;
     --amber:       #D9A461;
+    --h0-tint: #1F3528; --h0-edge: #3E6B50; --h0-deep: #8FD3A9;
+    --h1-tint: #1F2D3D; --h1-edge: #3F5F84; --h1-deep: #9CC3EC;
+    --h2-tint: #3A2F17; --h2-edge: #7A6230; --h2-deep: #E8C67E;
+    --h3-tint: #3B2522; --h3-edge: #7C4A43; --h3-deep: #EDA79E;
+    --h4-tint: #2C2740; --h4-edge: #5E528A; --h4-deep: #C3B5EA;
+    --h5-tint: #1B3533; --h5-edge: #3C6E69; --h5-deep: #8ED3CC;
+    --on-deep: #121816;
     --shadow:      0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3);
   }
 
@@ -115,24 +139,31 @@
     display: flex; align-items: center; gap: 14px; width: 100%;
     padding: 12px 16px;
     font-family: var(--sans); font-size: 19px; font-weight: 500; text-align: left;
-    color: var(--ink); background: var(--surface);
-    border: 2px solid var(--line); border-radius: var(--radius);
-    cursor: pointer; transition: background .12s ease, border-color .12s ease;
+    --tint: var(--h0-tint); --edge: var(--h0-edge); --deep: var(--h0-deep);
+    color: var(--ink); background: var(--tint);
+    border: 2px solid var(--edge); border-radius: var(--radius);
+    cursor: pointer; transition: background .12s ease, border-color .12s ease, color .12s ease;
   }
-  .choice:hover { border-color: var(--green); }
-  .choice:active { background: var(--surface-sunk); }
+  .choice[data-hue="1"] { --tint: var(--h1-tint); --edge: var(--h1-edge); --deep: var(--h1-deep); }
+  .choice[data-hue="2"] { --tint: var(--h2-tint); --edge: var(--h2-edge); --deep: var(--h2-deep); }
+  .choice[data-hue="3"] { --tint: var(--h3-tint); --edge: var(--h3-edge); --deep: var(--h3-deep); }
+  .choice[data-hue="4"] { --tint: var(--h4-tint); --edge: var(--h4-edge); --deep: var(--h4-deep); }
+  .choice[data-hue="5"] { --tint: var(--h5-tint); --edge: var(--h5-edge); --deep: var(--h5-deep); }
+
+  .choice:hover { border-color: var(--deep); }
+  .choice:active { background: var(--edge); }
   .choice[aria-pressed="true"] {
-    border-color: var(--green); background: var(--green-soft);
-    color: var(--green-deep); font-weight: 600;
+    background: var(--deep); border-color: var(--deep);
+    color: var(--on-deep); font-weight: 600;
   }
   .tick {
-    flex: 0 0 26px; height: 26px; border-radius: 50%;
-    border: 2px solid var(--line);
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    border: 2px solid var(--edge); background: var(--surface);
     display: flex; align-items: center; justify-content: center;
-    color: transparent; font-size: 15px; font-weight: 700;
+    color: transparent; font-size: 16px; font-weight: 700;
   }
   .choice[aria-pressed="true"] .tick {
-    background: var(--green); border-color: var(--green); color: var(--on-green);
+    background: var(--on-deep); border-color: var(--on-deep); color: var(--deep);
   }
 
   .rest {
@@ -409,7 +440,7 @@
 (function () {
   'use strict';
 
-  var APP_VERSION = '1.0.4';
+  var APP_VERSION = '1.1.0';
 
   var LS = {
     url:     'today.url',
@@ -653,10 +684,11 @@
   function renderChoices() {
     var box = $('choices');
     box.textContent = '';
-    activities.forEach(function (label) {
+    activities.forEach(function (label, i) {
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'choice';
+      b.dataset.hue = String(i % 6);
       b.setAttribute('aria-pressed', 'false');
       b.innerHTML = '<span class="tick">&#10003;</span>';
       b.appendChild(document.createTextNode(label));

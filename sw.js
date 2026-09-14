@@ -4,7 +4,7 @@
  * serving the old one. The font cache is deliberately left alone on a
  * shell bump: the typeface hasn't changed just because the HTML did.
  */
-var SHELL = 'today-shell-v5';
+var SHELL = 'today-shell-v6';
 var FONTS = 'today-fonts-v1';
 
 var SHELL_FILES = [
